@@ -1,305 +1,156 @@
-# 🔒 RISKLOCK
+# 🛡️ RISKLOCK: Governed Loan Risk Prediction
 
-> A Conservative Loan-Risk ML System — Self-Validating CI/CD with Explainability
-
-[![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-Automated-blue)](https://github.com)
-[![Python](https://img.shields.io/badge/Python-3.8%2B-green)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-
-**RISKLOCK** is a production-oriented ML system for loan default risk that enforces strict data governance, blocks unsafe training/deployment, and provides auditable, explainable predictions. Built for finance teams that cannot tolerate silent failures or model drift.
-
----
-
-## 📋 Table of Contents
-
-- [Why RISKLOCK](#why-risklock)
-- [Design Principles](#design-principles)
-- [What Makes It Unique](#what-makes-it-unique)
-- [Architecture](#architecture)
-- [Dataset & Target Policy](#dataset--target-policy)
-- [Data Quality & Safety Gates](#data-quality--safety-gates)
-- [Pipeline Stages](#pipeline-stages)
-- [Getting Started](#getting-started)
-- [Repository Structure](#repository-structure)
-- [Artifacts & Auditability](#artifacts--auditability)
-- [Testing & CI Outcomes](#testing--ci-outcomes)
-- [Presenting This Project](#presenting-this-project)
-- [Next Steps](#next-steps)
+<p align="center">
+  <img src="https://img.shields.io/badge/Author-Pritam%20Sanagapalli-blue?style=for-the-badge&logo=github" alt="Author">
+  <img src="https://img.shields.io/badge/Python-3.12-blue?style=for-the-badge&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-0.110.0-green?style=for-the-badge&logo=fastapi" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Docker-enabled-blue?style=for-the-badge&logo=docker" alt="Docker">
+</p>
 
 ---
 
-## 🎯 Why RISKLOCK
+## 📖 Overview
 
-Financial ML projects must be engineered differently from research prototypes. A model that performs well offline but is trained on low-quality or leaked data can cause catastrophic business and regulatory outcomes. 
+**RISKLOCK** is a production-grade, end-to-end Machine Learning ecosystem designed for **Loan Default Prediction**. It bridges the gap between experimental data science and mission-critical financial engineering. Unlike standard ML scripts, RISKLOCK enforces strict **Data Quality Gating**, **Model Governance**, and **Automated CI/CD** to ensure that only verified, high-performance models reach production.
 
-**RISKLOCK's primary objective is safety**: to ensure that training and deployment are policy-driven operations that only occur when data and model quality meet explicit, auditable standards.
+### 🔄 The RISKLOCK Lifecycle
 
----
-
-## 🛡️ Design Principles
-
-- **Zero-trust data**: Treat all incoming data as untrusted until validated
-- **Conservative policy**: Thresholds err on the side of rejecting suspicious inputs
-- **Fail-fast, fail-loud**: A single critical violation aborts training (CI fails)
-- **Explainability first**: Predictions must be interpretable and carry provenance metadata
-- **CI/CD controls ML outcomes**: Model artifacts and deployment are gated by ML tests, not by human whim
-
----
-
-## ✨ What Makes It Unique
-
-| Feature | Description |
-|---------|-------------|
-| 🚦 **Guarded Training** | Not every commit triggers a model build — only validated data does |
-| 🏛️ **Governance Baked into CI** | Data quality and model metrics determine pipeline success |
-| 📊 **Audit Artifacts** | Data hash, quality report, and metrics stored for every run |
-| 🔍 **Built-in Explainability** | Every prediction includes model version, data quality score, and top contributing factors |
-
----
-
-## 🏗️ Architecture
-
-```
-commit → GitHub Actions → (lint, tests, data_quality)
-    ├─ if data_quality PASS → train → evaluate
-    │    ├─ if evaluate PASS → build docker → publish artifacts
-    │    └─ else → abort (CI fail)
-    └─ else → abort (CI fail)
-
-deployed container → FastAPI → inference + explanations + metadata
+```mermaid
+graph TD
+    A[📊 Raw Data: loan.csv] --> B{🛡️ Data Quality Gate}
+    B -- Fail --> C[🛑 Pipeline Halted: Error Report]
+    B -- Pass --> D[🏗️ Feature Engineering]
+    D --> E[🤖 Model Training]
+    E --> F{📈 Performance Gate}
+    F -- ROC AUC < 0.70 --> G[🛑 Deployment Blocked]
+    F -- ROC AUC >= 0.70 --> H[📦 Artifact Generation]
+    H --> I[🧪 Unit & Integration Tests]
+    I --> J[🐳 Docker Image Build]
+    J --> K[⚡ FastAPI Deployment]
 ```
 
 ---
 
-## 📊 Dataset & Target Policy
+## 🚀 Key Features
 
-### Dataset
-**Lending Club loan CSV** — Place raw file at `data/raw/loan.csv`  
-⚠️ **DO NOT commit raw data to Git**
-
-### Target Policy (Conservative & Leak-Safe)
-
-| Loan Status | Label | Action |
-|-------------|-------|--------|
-| Fully Paid | 0 | Non-default |
-| Charged Off | 1 | Default |
-| Default | 1 | Default |
-| Current, Late, In Grace Period, etc. | — | **Excluded from training** |
-
-**Rationale**: Exclude in-flight loans to prevent label leakage and future outcome contamination.
+*   **🛡️ Policy-Driven Quality Gating**: Automated validation of missing rates, class imbalance, and financial sanity. If the data is "garbage," the pipeline stops before wasting training resources.
+*   **🏗️ Modular Architecture**: Clean separation of concerns between `core/` (ML logic) and `app/` (serving logic).
+*   **⚡ Intelligent Inference**: A FastAPI service that handles real-world "messy" inputs (e.g., `"12.5%"` or `"10+ years"`) using robust normalization logic.
+*   **🤖 Full CI/CD Automation**: GitHub Actions workflow that executes the entire pipeline—from quality checks to Docker builds—on every commit.
+*   **📦 Reproducible Environments**: Industry-standard Dockerization for consistent behavior across development, staging, and production.
 
 ---
 
-## 🚨 Data Quality & Safety Gates
+## 📂 Project Structure
 
-These checks run **before any training step** and are implemented in `core/data_quality.py`. Any **FAIL** causes immediate CI abort.
-
-| Check | Threshold | Action |
-|-------|-----------|--------|
-| Missing values (any feature) | > 10% | ❌ Abort |
-| Class imbalance (dominant class) | > 85% | ❌ Abort |
-| Duplicate rows | > 2% | ❌ Abort |
-| Zero-variance feature | any | ❌ Abort |
-| Outlier rate (IQR-based) | > 12% | ⚠️ Warn |
-| Financial sanity | any violation | ❌ Abort |
-
-**Financial sanity checks**:
-- `annual_inc ≤ 0`
-- `loan_amnt ≤ 0`
-- `loan_amnt > annual_inc × 10`
-
-> ⚠️ **Important**: Abort is non-negotiable. Warnings are recorded but allow training to proceed.
-
-### Data Quality Score
-
-A single scalar to summarize data health:
-
-```
-QualityScore = 100 
-  - 2 × (missing_rate_pct) 
-  - 3 × max(0, (dominant_class_pct - 50)) 
-  - 1 × (outlier_rate_pct)
+```text
+.
+├── .github/workflows/   # 🤖 CI/CD Automation
+├── app/                 # ⚡ FastAPI Inference Service
+│   ├── main.py          # API Entrypoint
+│   ├── predict.py       # Inference & Normalization
+│   └── schemas.py       # Pydantic Data Contracts
+├── core/                # 🏗️ ML Pipeline Core
+│   ├── data_quality.py  # Quality & Policy Gating
+│   ├── evaluate.py      # Performance Validation
+│   ├── features.py      # Feature Engineering Engine
+│   ├── ingestion.py     # Data Loading Logic
+│   └── train.py         # Model Training & Artifacts
+├── artifacts/           # 📦 Models, Metrics & Metadata
+├── Data/Raw/            # 📊 Training Dataset
+├── tests/               # 🧪 Automated Test Suite
+├── Dockerfile           # 🐳 Container Configuration
+└── requirements.txt     # 📋 Dependencies
 ```
 
-Stored in `artifacts/data_quality.json` with status, rows used, and rule violations.
-
 ---
 
-## 🔄 Pipeline Stages
+## 🛠️ Installation & Setup
 
-1. **Lint & Format** — Static checks (ruff/flake8)
-2. **Unit Tests** — Fast validation of core logic
-3. **Data Quality Checks** (`core/data_quality.py`)
-   - Schema validation, cleansing, gating
-   - If FAIL → CI stops (no training)
-4. **Training** (`core/train.py`)
-   - Deterministic (seeded)
-   - Uses saved sklearn Pipeline for features + model
-5. **Evaluation** (`core/evaluate.py`)
-   - Computes ROC-AUC, KS, calibration
-   - Compares to baseline
-   - If thresholds not met → CI fails; model saved but deployment blocked
-6. **Package** — Build Docker image only if evaluation passes
-7. **Artifacts** — Upload model, metrics, and data quality JSON for audit
+### 1. Prerequisites
+*   Python 3.12+
+*   Docker Desktop (for containerization)
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Python 3.8+
-- Virtual environment tool
-- Lending Club dataset
-
-### Installation
-
-1. **Create and activate virtual environment**:
-
+### 2. Quick Start
 ```bash
-# Create virtual environment
+# Clone the repository
+git clone https://github.com/PritamSanagapalli/RISKLOCK.git
+cd RISKLOCK
+
+# Set up virtual environment
 python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Activate on macOS / Linux
-source venv/bin/activate
-
-# Activate on Windows (PowerShell)
-venv\Scripts\Activate.ps1
-```
-
-2. **Install dependencies**:
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-3. **Place dataset**:
+---
 
-Put the Lending Club CSV at `data/raw/loan.csv`  
-⚠️ **DO NOT commit this file**
+## 🏎️ Running the Pipeline
 
-### Running the Pipeline
+RISKLOCK is built as a series of gated modules. You can run them manually or let the CI/CD handle it.
 
-**Run data quality checks**:
+| Step | Command | Description |
+| :--- | :--- | :--- |
+| **1. Quality** | `python -m core.data_quality` | Validates data schema & financial sanity. |
+| **2. Train** | `python -m core.train` | Trains the model & saves artifacts. |
+| **3. Evaluate** | `python -m core.evaluate` | Enforces performance thresholds (ROC AUC > 0.70). |
+| **4. Test** | `pytest` | Runs unit tests for API and Pipeline. |
+
+---
+
+## 🌐 API & Deployment
+
+### 🐳 Run with Docker (Recommended)
 ```bash
-python core/data_quality.py
-# On success: artifacts/data_quality.json created and printed
-# On failure: non-zero exit and JSON contains violations
+docker build -t risklock:latest .
+docker run -p 8000:8000 risklock:latest
 ```
 
-**Run training** (after data passes):
+### ⚡ Run Locally
 ```bash
-python core/train.py
+uvicorn app.main:app --reload
 ```
+Interactive Documentation: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-**Run evaluation** (after training):
+### 🧪 Sample API Request
 ```bash
-python core/evaluate.py
-# artifacts/metrics.json created
-```
-
-**Run FastAPI locally**:
-```bash
-uvicorn app.main:app --reload --port 8000
-# GET /health
-# POST /predict with validated payload
-```
-
----
-
-## 📁 Repository Structure
-
-```
-RISKLOCK/
-├── app/
-│   ├── main.py              # FastAPI entry (loads model + exposes endpoints)
-│   └── predict.py           # Inference + explainability utilities
-├── core/
-│   ├── data_quality.py      # Data validation, gating (critical)
-│   ├── ingestion.py         # Safe data loaders
-│   ├── features.py          # sklearn Pipeline: transforms (persisted)
-│   ├── train.py             # Deterministic training
-│   ├── evaluate.py          # Metric computation and gating
-│   └── registry.py          # Model provenance management
-├── artifacts/               # model.joblib, data_quality.json, metrics.json
-├── tests/                   # Unit & integration tests
-├── .github/
-│   └── workflows/
-│       └── ci.yml           # CI pipeline with ML gates
-├── Dockerfile               # Production container
-├── requirements.txt
-└── README.md
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loan_amnt": 15000.0,
+    "annual_inc": 75000.0,
+    "int_rate": "14.2%",
+    "emp_length": "5 years",
+    "dti": 18.5,
+    "earliest_cr_line": "Jan-2015",
+    "term": " 36 months",
+    "home_ownership": "RENT"
+  }'
 ```
 
 ---
 
-## 📦 Artifacts & Auditability
+## 🤖 Automated CI/CD
 
-All artifacts are uploaded by CI for traceability and rollback:
-
-- **`artifacts/data_quality.json`** — Full quality report (status, score, violations)
-- **`artifacts/metrics.json`** — Evaluation metrics and baseline comparison
-- **`artifacts/model.joblib`** — Serialized pipeline (transformers + model)
-
----
-
-## 🧪 Testing & CI Outcomes
-
-- **Unit tests** validate parsing, numeric conversions, and gate logic
-- **Data quality** intentionally fails with clear messages on real problems:
-  - Schema mismatch
-  - Unacceptable missing rate
-  - Invalid finance values
-- **Evaluation step** must fail the pipeline (non-zero exit) when metrics underperform thresholds — this prevents unsafe builds
+Every push to `main` triggers a high-integrity workflow:
+1.  **Linting & Hygiene**: Checks for code standards.
+2.  **Data Quality Gate**: Ensures the latest data is valid.
+3.  **Retraining**: Updates the model with the latest dataset.
+4.  **Evaluation Gate**: Prevents deployment if the new model's ROC AUC drops below 0.70.
+5.  **Unit Testing**: Runs the full test suite.
+6.  **Docker Build**: Creates a production-ready image.
 
 ---
 
-## 💼 Presenting This Project
+## 👨‍💻 Author
 
-### Resume Bullets
-
-- Built **RISKLOCK**: a conservative loan-risk ML system that automatically aborts training on unsafe data and blocks deployment when model metrics degrade
-- Implemented **CI/CD ML gating**: data validation and evaluation steps determine CI success, ensuring only auditable, safe models are containerized and published
-- Delivered **explainable inference**: per-loan risk drivers, model versioning, and data-quality provenance included in API responses
-
-### Interview Talking Points
-
-- **Why exclude Current loans?** → Future leakage / label certainty
-- **Trade-offs**: Logistic regression for interpretability vs boosting for raw accuracy
-- **How CI gating prevents silent production incidents**
-- **How to extend the system** to monitoring and automated retraining with drift detection
-
----
-
-## 🔮 Next Steps & Extension Ideas
-
-- [ ] Add drift detection (monthly or streaming) and automatic alerts
-- [ ] Champion–challenger framework to validate new models in production
-- [ ] Add calibration monitoring and re-calibration jobs
-- [ ] Replace local artifacts storage with a secure model registry
-- [ ] Add role-based access control and audit logs for governance
-
----
-
-## 📝 Final Notes
-
-> **Do not commit raw data.** Add `data/` to `.gitignore`.
-
-> Keep thresholds and policy constants under a single config (future config file) so business owners can adjust policy without code changes.
-
-> This project is intentionally conservative — that is the point. It demonstrates production discipline and governance, which is what financial teams value.
+**Pritam Sanagapalli**
+*   GitHub: [@PritamSanagapalli](https://github.com/PritamSanagapalli)
+*   Portfolio: [https://github.com/PritamSanagapalli](https://github.com/PritamSanagapalli)
 
 ---
 
 ## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/RISKLOCK/issues).
-
----
-
-**Made with ❤️ for production-grade ML systems**
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
