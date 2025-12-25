@@ -364,6 +364,11 @@ Contributions are welcome! Please follow these steps:
 
 Please ensure all tests pass and code is properly formatted before submitting.
 
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 

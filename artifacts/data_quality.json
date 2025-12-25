@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "missing_rate": 0.0,
+  "class_imbalance": 0.4612,
+  "duplicate_rate": 0.0,
+  "outlier_rate": 0.0199,
+  "quality_score": 98.01,
+  "violations": []
+}

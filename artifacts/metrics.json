@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "roc_auc": 0.7,
+  "ks_statistic": 0.2895,
+  "thresholds": {
+    "min_roc_auc": 0.695,
+    "min_ks_statistic": 0.25
+  },
+  "violations": []
+}

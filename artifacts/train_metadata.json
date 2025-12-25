@@ -1,0 +1,20 @@
+{
+  "model_type": "LogisticRegression",
+  "roc_auc_validation": 0.6994,
+  "rows_used": 1303271,
+  "features": {
+    "numeric": [
+      "loan_amnt",
+      "annual_inc",
+      "int_rate",
+      "emp_length",
+      "dti",
+      "credit_hist_length"
+    ],
+    "categorical": [
+      "term",
+      "home_ownership"
+    ]
+  },
+  "random_state": 42
+}
