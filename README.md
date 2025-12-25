@@ -14,8 +14,6 @@
 
 **RISKLOCK** is not just a machine learning model—it's a **Governed ML System** built for production environments. Designed for **Loan Default Prediction** using the Lending Club dataset (~2.2M records, 1.1GB), RISKLOCK enforces a strict **"No Garbage In, No Garbage Out"** policy through automated data quality gates and performance-based deployment blockers.
 
-For a deep dive into the technical architecture, implementation details, and design decisions, please refer to the **[Technical Explanation Guide (EXPLANATION.md)](./EXPLANATION.md)**.
-
 ---
 
 ## 📊 Data Source
