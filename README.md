@@ -70,7 +70,7 @@ RISKLOCK/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml           # CI/CD Pipeline Configuration
-├── app/                     # ⚡ Inference Plane (Real-time Serving)
+├── app/                     # Inference Plane (Real-time Serving)
 │   ├── main.py              # FastAPI Application Entry
 │   ├── predict.py           # Prediction Logic & Input Normalization
 │   └── schemas.py           # Pydantic Data Contracts
@@ -372,6 +372,3 @@ Please ensure all tests pass and code is properly formatted before submitting.
 
 ---
 
-<p align="center">
-  <i>Built with ❤️ for production-grade machine learning</i>
-</p>
