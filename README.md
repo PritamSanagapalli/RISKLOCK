@@ -99,7 +99,7 @@ RISKLOCK/
 
 ---
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 - **Python 3.12+** (for latest language features)
@@ -163,7 +163,7 @@ docker run -p 8000:8000 risklock:latest
 open http://localhost:8000/docs
 ```
 
-### ⚡ Local Development Server
+### Local Development Server
 
 ```bash
 # Start FastAPI with hot reload
@@ -361,12 +361,6 @@ Contributions are welcome! Please follow these steps:
 5. Open a Pull Request
 
 Please ensure all tests pass and code is properly formatted before submitting.
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 
