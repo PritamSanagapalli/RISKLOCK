@@ -10,13 +10,13 @@
 
 ---
 
-## 📖 Overview
+## Overview
 
 **RISKLOCK** is not just a machine learning model—it's a **Governed ML System** built for production environments. Designed for **Loan Default Prediction** using the Lending Club dataset (~2.2M records, 1.1GB), RISKLOCK enforces a strict **"No Garbage In, No Garbage Out"** policy through automated data quality gates and performance-based deployment blockers.
 
 ---
 
-## 📊 Data Source
+## Data Source
 
 The model is trained on the **Lending Club Loan Data**, a comprehensive dataset of unsecured consumer loans.
 
@@ -30,57 +30,57 @@ The model is trained on the **Lending Club Loan Data**, a comprehensive dataset 
 
 ```mermaid
 graph TD
-    A[📊 Raw Data: loan.csv] --> B{🛡️ Data Quality Gate}
-    B -- Fail --> C[🛑 Pipeline Halted: Error Report]
-    B -- Pass --> D[🏗️ Feature Engineering]
-    D --> E[🤖 Model Training]
-    E --> F{📈 Performance Gate}
-    F -- ROC AUC < 0.70 --> G[🛑 Deployment Blocked]
-    F -- ROC AUC >= 0.70 --> H[📦 Artifact Generation]
-    H --> I[🧪 Unit & Integration Tests]
-    I --> J[🐳 Docker Image Build]
-    J --> K[⚡ FastAPI Deployment]
+    A[ Raw Data: loan.csv] --> B{Data Quality Gate}
+    B -- Fail --> C[Pipeline Halted: Error Report]
+    B -- Pass --> D[ Feature Engineering]
+    D --> E[Model Training]
+    E --> F{Performance Gate}
+    F -- ROC AUC < 0.70 --> G[Deployment Blocked]
+    F -- ROC AUC >= 0.70 --> H[Artifact Generation]
+    H --> I[Unit & Integration Tests]
+    I --> J[Docker Image Build]
+    J --> K[FastAPI Deployment]
 ```
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-### 🛡️ Production-Grade Governance
+### Production-Grade Governance
 - **Policy-Driven Quality Gating**: Validates missing rates (<5% threshold), class imbalance, and financial sanity checks (negative interest rates, invalid DTI)
 - **Model Package Artifacts**: Every training run generates comprehensive metadata (metrics, feature names, quality reports) for audit trails
 - **Performance Blockers**: CI/CD automatically fails if ROC AUC drops below 0.70
 
-### 🏗️ Engineering Excellence
+### Engineering Excellence
 - **Zero Training-Serving Skew**: Centralized feature engineering (`core/features.py`) used in both training and inference
 - **Intelligent Input Handling**: API normalizes messy real-world inputs (`"12.5%"`, `"10+ years"`, `" 36 months "`)
 - **Explainable Predictions**: Returns top risk factors (e.g., "High DTI ratio", "Short credit history") alongside probabilities
 
-### 🤖 Full Automation
+### Full Automation
 - **End-to-End CI/CD**: GitHub Actions orchestrates quality checks → training → evaluation → testing → Docker build
 - **Reproducible Environments**: Dockerized deployment eliminates "works on my machine" issues
 - **Modular Architecture**: Clean separation between ML logic (`core/`) and serving logic (`app/`)
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 RISKLOCK/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml           # 🤖 CI/CD Pipeline Configuration
+│       └── ci.yml           # CI/CD Pipeline Configuration
 ├── app/                     # ⚡ Inference Plane (Real-time Serving)
 │   ├── main.py              # FastAPI Application Entry
 │   ├── predict.py           # Prediction Logic & Input Normalization
 │   └── schemas.py           # Pydantic Data Contracts
-├── core/                    # 🏗️ Training Plane (Offline ML Lifecycle)
+├── core/                    # Training Plane (Offline ML Lifecycle)
 │   ├── data_quality.py      # Quality Gate & Policy Validation
 │   ├── evaluate.py          # Performance Evaluation & Thresholds
 │   ├── features.py          # Centralized Feature Engineering
 │   ├── ingestion.py         # Data Loading with Smart Fallbacks
 │   └── train.py             # Model Training & Artifact Export
-├── artifacts/               # 📦 Model Packages
+├── artifacts/               # Model Packages
 │   ├── model.joblib         # Serialized Model Binary
 │   ├── metrics.json         # Performance Stats (AUC, F1, etc.)
 │   ├── train_metadata.json  # Training Logs & Feature Names
@@ -89,12 +89,12 @@ RISKLOCK/
 │   └── Raw/
 │       ├── loan.csv         # Full Dataset (download from Kaggle)
 │       └── loan_sample.csv  # Sample for CI/CD & Testing
-├── tests/                   # 🧪 Automated Test Suite
+├── tests/                   # Automated Test Suite
 │   ├── test_api.py          # API Endpoint Tests
 │   └── test_pipeline.py     # Pipeline Integration Tests
-├── Dockerfile               # 🐳 Multi-stage Container Build
-├── requirements.txt         # 📋 Python Dependencies
-└── README.md                # 📖 This File
+├── Dockerfile               # Multi-stage Container Build
+├── requirements.txt         # Python Dependencies
+└── README.md                # This File
 ```
 
 ---
@@ -127,7 +127,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🏎️ Running the Pipeline
+## Running the Pipeline
 
 ### Manual Execution (Step-by-Step)
 
@@ -148,9 +148,9 @@ If any step fails, deployment is blocked automatically.
 
 ---
 
-## 🌐 API Usage & Deployment
+## API Usage & Deployment
 
-### 🐳 Docker Deployment (Recommended)
+### Docker Deployment (Recommended)
 
 ```bash
 # Build the container
@@ -170,7 +170,7 @@ open http://localhost:8000/docs
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 📡 API Endpoints
+### API Endpoints
 
 #### `GET /health`
 Health check endpoint for monitoring.
@@ -224,7 +224,7 @@ curl -X POST http://localhost:8000/predict \
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Run All Tests
 ```bash
@@ -245,7 +245,7 @@ pytest --cov=app --cov=core --cov-report=html
 
 ---
 
-## 📊 Model Performance
+## Model Performance
 
 The current model achieves the following metrics on the validation set:
 
@@ -260,7 +260,7 @@ The current model achieves the following metrics on the validation set:
 
 ---
 
-## 🔧 Adding New Features
+## Adding New Features
 
 RISKLOCK is designed for extensibility. To add a new feature:
 
@@ -290,7 +290,7 @@ This ensures both training and inference use the same transformation logic.
 
 ---
 
-## 🤖 CI/CD Pipeline Details
+## CI/CD Pipeline Details
 
 The GitHub Actions workflow (`.github/workflows/ci.yml`) enforces quality at every stage:
 
@@ -307,7 +307,7 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) enforces quality at eve
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Issue: `ModuleNotFoundError`
 **Solution:** Ensure `PYTHONPATH` is set correctly:
@@ -329,7 +329,7 @@ docker info
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 - [ ] Integration with MLflow for experiment tracking
 - [ ] A/B testing framework for model comparison
@@ -339,7 +339,7 @@ docker info
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Pritam Sanagapalli**  
 Machine Learning Engineer | Financial AI Systems
